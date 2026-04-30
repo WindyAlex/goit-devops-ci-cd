@@ -40,11 +40,11 @@ else
 fi
 
 # python3-venv
-if ! python3 -m venv --help &> /dev/null; then
-    echo "Installing python3-venv..."
-    sudo apt install -y python3-venv
+if ! python3.14 -m venv --help &> /dev/null; then
+    echo "Installing python3.14-venv..."
+    sudo apt install -y python3.14-venv
 else
-    echo "python3-venv is already installed."
+    echo "python3.14-venv is already installed."
 fi
 
 # Virtual environment
