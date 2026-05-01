@@ -2,7 +2,7 @@ DevOps CI/CD: hw5
 
 # Lesson 5: Infrastructure as Code (Terraform)
 
-## 📌 Description
+## Description
 
 This project demonstrates Infrastructure as Code (IaC) using Terraform to deploy AWS infrastructure.
 
@@ -15,7 +15,7 @@ The following components are implemented:
 
 ---
 
-## 🏗 Project Structure
+## Project Structure
 lesson-5/
 │
 ├── main.tf
@@ -30,16 +30,16 @@ lesson-5/
 
 ---
 
-## ⚙️ Modules
+## Modules
 
-### 🔹 s3-backend
+### s3-backend
 - Creates S3 bucket for Terraform state
 - Enables versioning
 - Creates DynamoDB table for state locking
 
 ---
 
-### 🔹 vpc
+### vpc
 - Creates VPC (10.0.0.0/16)
 - 3 public subnets
 - 3 private subnets
@@ -49,13 +49,13 @@ lesson-5/
 
 ---
 
-### 🔹 ecr
+### ecr
 - Creates ECR repository
 - Enables image scan on push
 
 ---
 
-## 🚀 Commands
+## Commands
 
 ```bash
 terraform init
@@ -63,6 +63,7 @@ terraform validate
 terraform plan
 terraform apply
 terraform destroy
+```
 
 ## Screenshots
 
