@@ -16,6 +16,7 @@ The following components are implemented:
 ---
 
 ## Project Structure
+```
 lesson-5/
 │
 ├── main.tf
@@ -26,6 +27,7 @@ lesson-5/
   ├── s3-backend/
   ├── vpc/
   └── ecr/
+```
 
 
 ---
