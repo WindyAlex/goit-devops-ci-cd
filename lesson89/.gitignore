@@ -4,6 +4,4 @@
 *.tfvars
 *.tfvars.json
 *.tfplan
-.terraform.lock.hcl
 kubeconfig
-terraform.tfvars

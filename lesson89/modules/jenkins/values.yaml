@@ -1,0 +1,23 @@
+controller:
+  serviceType: LoadBalancer
+
+  image:
+    repository: jenkins/jenkins
+    tag: "2.479.3-jdk17"
+
+  admin:
+    username: admin
+    password: admin12345
+
+  installPlugins: false
+
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+
+persistence:
+  enabled: false
