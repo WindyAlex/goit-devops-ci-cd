@@ -86,11 +86,11 @@ lesson89/Jenkinsfile
 Основні етапи pipeline:
 
 1. Build & Push Docker Image
-    збірка Docker-образу через Kaniko;
-    push образу в AWS ECR.
+   - збірка Docker-образу через Kaniko;
+   - push образу в AWS ECR.
 2. Update Chart Tag in Git
-    оновлення тегу образу у lesson-7/charts/django-app/values.yaml;
-    commit і push змін у гілку lesson-8-9.
+   - оновлення тегу образу у lesson-7/charts/django-app/values.yaml;
+   - commit і push змін у гілку lesson-8-9.
 
 ## Docker Image
 
@@ -131,13 +131,28 @@ kubectl get pods -A
 
 ## Скріншоти
 
+Jenkins login:
 ![Jenkins login](Jenkins1.png)
+
+Jenkins ci:
 ![Jenkins ci](Jenkins2.png)
+
+Jenkins process:
 ![Jenkins process](Jenkins3.png)
+
+Jenkins success:
 ![Jenkins success](Jenkins4.png)
+
+Jenkins console:
 ![Jenkins console](Jenkins5.png)
+
+Argo login:
 ![Argo login](Argo1.png)
+
+Argo page:
 ![Argo page](Argo2.png)
+
+Kubectl pods:
 ![Kubectl pods](Kubectl.png)
 
 ## Висновок
