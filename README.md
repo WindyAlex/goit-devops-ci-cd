@@ -37,7 +37,8 @@ lesson-7/
 ├── terraform.tfvars
 │
 ├── modules/
-│ └── eks/
+│ ├── eks/
+│ └── ecr/
 │
 └── charts/
   └── django-app/
@@ -78,16 +79,17 @@ kubectl get nodes
 ### 3. Docker + ECR
 
 ```bash
-docker build -t lesson-5-ecr .
-docker tag lesson-5-ecr:latest 706243848287.dkr.ecr.eu-north-1.amazonaws.com/lesson-5-ecr:latest
-docker push 706243848287.dkr.ecr.eu-north-1.amazonaws.com/lesson-5-ecr:latest
+docker build -t django-app ./django-app
+docker tag django-app:latest $(cd lesson-7 && terraform output -raw ecr_repository_url):latest
+docker push $(cd lesson-7 && terraform output -raw ecr_repository_url):latest
 ```
 
 ### 4. Helm
 
 ```bash
 helm lint ./charts/django-app
-helm install django-app ./charts/django-app
+helm upgrade --install django-app ./charts/django-app \
+  --set image.repository=$(terraform output -raw ecr_repository_url)
 ```
 
 ### 5. Перевірка

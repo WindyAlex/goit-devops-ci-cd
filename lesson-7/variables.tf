@@ -9,8 +9,7 @@ variable "project_name" {
 }
 
 variable "vpc_id" {
-  type    = string
-  default = "vpc-0fa606959bf216928"
+  type = string
 }
 
 variable "private_subnet_ids" {

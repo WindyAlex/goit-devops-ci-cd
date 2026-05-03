@@ -1,7 +1,7 @@
 replicaCount: 2
 
 image:
-  repository: "706243848287.dkr.ecr.eu-north-1.amazonaws.com/lesson-5-ecr"
+  repository: ""
   tag: "latest"
   pullPolicy: Always
 

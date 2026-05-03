@@ -81,6 +81,10 @@ resource "aws_eks_node_group" "this" {
     max_size     = 3
   }
 
+  lifecycle {
+    ignore_changes = [scaling_config[0].desired_size]
+  }
+
   depends_on = [
     aws_eks_cluster.this,
     aws_iam_role_policy_attachment.worker_node_policy,
