@@ -15,3 +15,15 @@ variable "vpc_id" {
 variable "private_subnet_ids" {
   type = list(string)
 }
+
+variable "db_username" {
+  description = "Database admin username"
+  type        = string
+  default     = "postgres"
+}
+
+variable "db_password" {
+  description = "Database admin password"
+  type        = string
+  sensitive   = true
+}

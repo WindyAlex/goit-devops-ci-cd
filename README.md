@@ -1,169 +1,119 @@
-# DevOps CI/CD: Lesson 8-9 — Jenkins + ECR + Helm + Argo CD
+# Terraform DB Module (RDS / Aurora)
 
-## Мета
+Цей проєкт розширює попередню інфраструктуру та додає універсальний Terraform-модуль для створення баз даних.
 
-У цьому проєкті реалізовано CI/CD процес для Django-застосунку з використанням Jenkins, Kubernetes Agent, Kaniko, AWS ECR, Helm та Argo CD.
+## Опис
 
-Pipeline автоматично:
+Модуль `rds` у папці `lesson-7` дозволяє створювати:
 
-- отримує код із GitHub;
-- збирає Docker-образ через Kaniko;
-- публікує Docker-образ в Amazon ECR;
-- оновлює тег образу у Helm `values.yaml`;
-- пушить зміни назад у GitHub.
+- Звичайну RDS базу (PostgreSQL / MySQL)
+- Aurora кластер (PostgreSQL / MySQL)
 
----
+Тип бази визначається змінною:
 
-## Використані технології
-
-- Terraform
-- AWS EKS
-- AWS ECR
-- Kubernetes
-- Helm
-- Jenkins
-- Kaniko
-- GitHub
-- Argo CD
+use_aurora = true | false
 
 ---
 
-## Структура проєкту
+## Приклад використання
 
-```text
-lesson89/
-├── main.tf
-├── outputs.tf
-├── providers.tf
-├── variables.tf
-├── Jenkinsfile
-├── modules/
-    ├── jenkins/
-    └── argo_cd/
+```hcl
+module "rds" {
+  source = "./modules/rds"
 
-lesson-7/
-└── charts/
-    └── django-app/
-        ├── templates/
-        ├── Chart.yaml
-        └── values.yaml
+  project_name = var.project_name
+
+  use_aurora = false
+
+  vpc_id     = var.vpc_id
+  subnet_ids = var.private_subnet_ids
+
+  engine         = "postgres"
+  engine_version = "15"
+  instance_class = "db.t3.micro"
+
+  db_name  = "appdb"
+  username = var.db_username
+  password = var.db_password
+
+  multi_az = false
+}
 ```
 
-## Запуск Terraform
+---
 
-```bash
-terraform init
-terraform apply
+## Як увімкнути Aurora
+
+```hcl
+use_aurora     = true
+engine         = "aurora-postgresql"
+engine_version = "15.4"
 ```
 
-Після застосування Terraform створюються та налаштовуються:
+---
 
-- Jenkins у Kubernetes через Helm;
-- Jenkins Kubernetes Agent;
-- IAM роль для доступу Jenkins/Kaniko до ECR;
-- Argo CD через Helm.
+## Що створює модуль
 
-## Доступ до Jenkins
+В обох випадках:
 
-```bash
-kubectl port-forward svc/jenkins 8080:8080 -n jenkins
-```
+- DB Subnet Group
+- Security Group
+- Parameter Group
 
-Після цього Jenkins доступний за адресою:
+Додатково:
 
-```text
-http://localhost:8080
-```
+- RDS → aws_db_instance
+- Aurora → aws_rds_cluster + aws_rds_cluster_instance
 
-## Jenkins Pipeline
+---
 
-Pipeline описаний у файлі:
+## Вхідні змінні
 
-```text
-lesson89/Jenkinsfile
-```
+| Змінна | Опис |
+|------|------|
+| project_name | Префікс для ресурсів |
+| use_aurora | Перемикає тип БД |
+| vpc_id | ID VPC |
+| subnet_ids | Список приватних підмереж |
+| engine | Тип бази даних |
+| engine_version | Версія БД |
+| instance_class | Тип інстансу |
+| db_name | Назва бази |
+| username | Користувач БД |
+| password | Пароль БД |
+| multi_az | Відмовостійкість |
 
-Основні етапи pipeline:
+---
 
-1. Build & Push Docker Image
-   - збірка Docker-образу через Kaniko;
-   - push образу в AWS ECR.
-2. Update Chart Tag in Git
-   - оновлення тегу образу у lesson-7/charts/django-app/values.yaml;
-   - commit і push змін у гілку lesson-8-9.
+## Outputs
 
-## Docker Image
+| Output | Опис |
+|------|------|
+| db_endpoint | Endpoint бази |
+| db_port | Порт |
+| db_security_group_id | Security Group |
 
-Образ збирається та публікується в AWS ECR:
-
-```text
-706243848287.dkr.ecr.eu-north-1.amazonaws.com/lesson-5-ecr:v1.0.3
-```
-
-## Доступ до Argo CD
-
-Запуск port-forward:
-
-```bash
-kubectl port-forward svc/argo-cd-argocd-server 8081:443 -n argocd
-```
-
-Після цього Argo CD доступний за адресою:
-
-```text
-http://localhost:8081
-```
-
-## Argo CD Application
-
-Argo CD підключений до Git-репозиторію та автоматично синхронізує застосунок.
-
-Стан застосунку:
-
-- Status: Healthy
-- Sync: Synced
-
-## Перевірка Kubernetes
-
-```bash
-kubectl get pods -A
-```
+---
 
 ## Скріншоти
 
-Jenkins login:
-![Jenkins login](Jenkins1.png)
+### AWS RDS
 
-Jenkins ci:
-![Jenkins ci](Jenkins2.png)
+![RDS](./DB.png)
 
-Jenkins process:
-![Jenkins process](Jenkins3.png)
+---
 
-Jenkins success:
-![Jenkins success](Jenkins4.png)
+### Terraform Output
 
-Jenkins console:
-![Jenkins console](Jenkins5.png)
+![Terraform Output](./Outputs.png)
 
-Argo login:
-![Argo login](Argo1.png)
+---
 
-Argo page:
-![Argo page](Argo2.png)
+## Команди
 
-Kubectl pods:
-![Kubectl pods](Kubectl.png)
-
-## Висновок
-
-У результаті було реалізовано повний CI/CD процес:
-
-- Jenkins автоматично запускає pipeline
-- Kaniko збирає Docker-образ без Docker daemon
-- Образ публікується в Amazon ECR
-- Helm chart автоматично оновлюється новим тегом
-- Argo CD автоматично синхронізує застосунок
-- Зміни пушаться назад у GitHub
-
-Pipeline успішно завершився зі статусом SUCCESS.
+```bash
+terraform init
+terraform validate
+terraform plan
+terraform apply
+```

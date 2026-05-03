@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "this" {
-  name = var.repository_name
+  name         = var.repository_name
   force_delete = true
 
   image_scanning_configuration {
