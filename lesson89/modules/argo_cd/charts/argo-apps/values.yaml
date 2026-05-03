@@ -1,4 +1,4 @@
 repoURL: "${repo_url}"
 targetRevision: "${branch}"
-path: "lesson89/charts/django-app"
+path: "lesson-7/charts/django-app"
 namespace: "default"

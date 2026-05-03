@@ -43,10 +43,17 @@ spec:
     }
   }
 
+  parameters {
+    string(
+      name: 'ECR_REPOSITORY_URL',
+      defaultValue: '',
+      description: 'ECR repository URL from Terraform output'
+    )
+  }
+
   environment {
-    ECR_REGISTRY = "706243848287.dkr.ecr.eu-north-1.amazonaws.com"
-    IMAGE_NAME   = "lesson-5-ecr"
-    IMAGE_TAG    = "v1.0.${BUILD_NUMBER}"
+    AWS_REGION = "eu-north-1"
+    IMAGE_TAG  = "v1.0.${BUILD_NUMBER}"
 
     COMMIT_EMAIL = "jenkins@localhost"
     COMMIT_NAME  = "jenkins"
@@ -60,14 +67,14 @@ spec:
             /kaniko/executor \
               --context `pwd`/django-app \
               --dockerfile `pwd`/django-app/Dockerfile \
-              --destination=$ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG \
+              --destination=$ECR_REPOSITORY_URL:$IMAGE_TAG \
               --cache=true
           '''
         }
       }
     }
 
-    stage('Update Chart Tag in Git') {
+    stage('Update Chart Image in Git') {
       steps {
         container('git') {
           withCredentials([usernamePassword(credentialsId: 'github-token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PAT')]) {
@@ -76,17 +83,24 @@ spec:
               cd repo
               git checkout lesson-8-9
 
-              sed -i "s/tag: .*/tag: \\"$IMAGE_TAG\\"/" lesson-7/charts/django-app/values.yaml
+              sed -i "s|repository: .*|repository: \\"$ECR_REPOSITORY_URL\\"|" lesson-7/charts/django-app/values.yaml
+              sed -i "s|tag: .*|tag: \\"$IMAGE_TAG\\"|" lesson-7/charts/django-app/values.yaml
 
               git config user.email "$COMMIT_EMAIL"
               git config user.name "$COMMIT_NAME"
 
               git add lesson-7/charts/django-app/values.yaml
-              git commit -m "Update image tag to $IMAGE_TAG" || echo "No changes"
+              git commit -m "[skip ci] Update image to $ECR_REPOSITORY_URL:$IMAGE_TAG" || echo "No changes"
               git push origin lesson-8-9
             '''
           }
         }
+      }
+    }
+
+    stage('Checkout') {
+      steps {
+        checkout scm
       }
     }
   }
