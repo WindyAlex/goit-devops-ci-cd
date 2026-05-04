@@ -43,7 +43,7 @@ module "rds" {
   multi_az = false
 
   allowed_cidr_blocks     = [module.vpc.vpc_cidr_block]
-  backup_retention_period = 7
+  backup_retention_period = 1
 
   depends_on = [module.vpc]
 }
