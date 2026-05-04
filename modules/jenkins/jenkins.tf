@@ -69,13 +69,13 @@ resource "helm_release" "jenkins" {
 
   values = [
     templatefile("${path.module}/values.yaml.tftpl", {
-      github_username         = var.github_username
-      github_token            = var.github_token
-      git_repo_url            = var.git_repo_url
-      git_branch              = var.git_branch
-      ecr_repository_url      = var.ecr_repository_url
-      aws_region              = var.aws_region
-      jenkins_admin_password  = var.jenkins_admin_password
+      github_username        = var.github_username
+      github_token           = var.github_token
+      git_repo_url           = var.git_repo_url
+      git_branch             = var.git_branch
+      ecr_repository_url     = var.ecr_repository_url
+      aws_region             = var.aws_region
+      jenkins_admin_password = var.jenkins_admin_password
     })
   ]
 

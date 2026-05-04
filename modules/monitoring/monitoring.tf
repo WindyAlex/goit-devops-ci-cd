@@ -21,7 +21,11 @@ resource "helm_release" "grafana" {
   chart      = "grafana"
   version    = "8.6.4"
 
-  values = [file("${path.module}/grafana-values.yaml")]
+  values = [
+    templatefile("${path.module}/grafana-values.yaml.tftpl", {
+      grafana_admin_password = var.grafana_admin_password
+    })
+  ]
 
   depends_on = [helm_release.prometheus]
 }

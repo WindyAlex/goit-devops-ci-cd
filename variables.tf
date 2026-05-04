@@ -68,7 +68,7 @@ variable "jenkins_admin_password" {
 }
 
 variable "grafana_admin_password" {
-  type      = string
-  sensitive = true
+  type        = string
+  sensitive   = true
   description = "Grafana admin password."
 }
