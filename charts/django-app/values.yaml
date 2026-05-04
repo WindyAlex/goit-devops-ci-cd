@@ -1,8 +1,8 @@
 replicaCount: 2
 
 image:
-  repository: ""
-  tag: "latest"
+  repository: "706243848287.dkr.ecr.eu-central-1.amazonaws.com/final-devops-django"
+  tag: "4"
   pullPolicy: Always
 
 service:
