@@ -1,0 +1,4 @@
+repoURL: "${repo_url}"
+targetRevision: "${branch}"
+path: "${chart_path}"
+namespace: "${app_ns}"

@@ -1,0 +1,78 @@
+controller:
+  serviceType: ClusterIP
+
+  image:
+    repository: jenkins/jenkins
+    tag: "lts-jdk17"
+
+  admin:
+    username: admin
+    password: admin12345
+
+  serviceAccount:
+    name: jenkins-sa
+    create: false
+
+  installPlugins:
+    - kubernetes
+    - workflow-aggregator
+    - git
+    - configuration-as-code
+    - credentials
+    - credentials-binding
+    - github
+    - job-dsl
+
+  JCasC:
+    configScripts:
+      credentials: |
+        credentials:
+          system:
+            domainCredentials:
+              - credentials:
+                  - usernamePassword:
+                      scope: GLOBAL
+                      id: github-token
+                      username: "${github_username}"
+                      password: "${github_token}"
+                      description: "GitHub PAT"
+      seed-job: |
+        jobs:
+          - script: >
+              pipelineJob("django-ci") {
+                definition {
+                  cpsScm {
+                    scm {
+                      git {
+                        remote {
+                          url("${git_repo_url}")
+                          credentials("github-token")
+                        }
+                        branches("*/${git_branch}")
+                      }
+                    }
+                    scriptPath("Django/Jenkinsfile")
+                  }
+                }
+              }
+
+  containerEnv:
+    - name: ECR_REPOSITORY_URL
+      value: "${ecr_repository_url}"
+    - name: AWS_REGION
+      value: "${aws_region}"
+    - name: GIT_REPO_URL
+      value: "${git_repo_url}"
+    - name: GIT_BRANCH
+      value: "${git_branch}"
+
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+
+persistence:
+  enabled: false

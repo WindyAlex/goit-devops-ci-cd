@@ -1,0 +1,95 @@
+pipeline {
+  agent {
+    kubernetes {
+      yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    jenkins: django-ci
+spec:
+  serviceAccountName: jenkins-sa
+  containers:
+    - name: kaniko
+      image: gcr.io/kaniko-project/executor:debug
+      command: ['cat']
+      tty: true
+      env:
+        - name: AWS_SDK_LOAD_CONFIG
+          value: "true"
+      resources:
+        requests:
+          cpu: "500m"
+          memory: "1Gi"
+        limits:
+          cpu: "1000m"
+          memory: "2Gi"
+    - name: git
+      image: alpine/git:2.45.2
+      command: ['cat']
+      tty: true
+      resources:
+        requests:
+          cpu: "100m"
+          memory: "128Mi"
+        limits:
+          cpu: "500m"
+          memory: "512Mi"
+"""
+    }
+  }
+
+  environment {
+    IMAGE_TAG = "${env.BUILD_NUMBER}"
+    COMMIT_EMAIL = "jenkins@example.com"
+    COMMIT_NAME = "Jenkins CI"
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Build and Push Image') {
+      steps {
+        container('kaniko') {
+          sh '''
+            /kaniko/executor \
+              --context "$WORKSPACE/Django" \
+              --dockerfile "$WORKSPACE/Django/Dockerfile" \
+              --destination "$ECR_REPOSITORY_URL:$IMAGE_TAG" \
+              --cache=true
+          '''
+        }
+      }
+    }
+
+    stage('Update Helm Chart') {
+      steps {
+        container('git') {
+          withCredentials([usernamePassword(credentialsId: 'github-token', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
+            sh '''
+              set -e
+              rm -rf repo
+              AUTH_REPO_URL=$(echo "$GIT_REPO_URL" | sed "s#https://#https://$GIT_USER:$GIT_TOKEN@#")
+              git clone "$AUTH_REPO_URL" repo
+              cd repo
+              git checkout "$GIT_BRANCH"
+
+              sed -i "s|repository: .*|repository: \"$ECR_REPOSITORY_URL\"|" charts/django-app/values.yaml
+              sed -i "s|tag: .*|tag: \"$IMAGE_TAG\"|" charts/django-app/values.yaml
+
+              git config user.email "$COMMIT_EMAIL"
+              git config user.name "$COMMIT_NAME"
+              git add charts/django-app/values.yaml
+              git commit -m "[skip ci] Update image to $ECR_REPOSITORY_URL:$IMAGE_TAG" || echo "No changes to commit"
+              git push origin "$GIT_BRANCH"
+            '''
+          }
+        }
+      }
+    }
+  }
+}

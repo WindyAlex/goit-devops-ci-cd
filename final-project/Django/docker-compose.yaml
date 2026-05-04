@@ -1,0 +1,32 @@
+services:
+  django:
+    build: .
+    container_name: final-django
+    expose:
+      - "8000"
+    environment:
+      DEBUG: "True"
+      ALLOWED_HOSTS: "*"
+
+  db:
+    image: postgres:16-alpine
+    container_name: final-postgres
+    environment:
+      POSTGRES_DB: appdb
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: apppassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: final-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - django
+
+volumes:
+  postgres_data:
