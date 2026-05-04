@@ -21,10 +21,11 @@ resource "helm_release" "argo_apps" {
 
   values = [
     templatefile("${path.module}/charts/argo-apps/values.yaml", {
-      repo_url   = var.git_repo_url
-      branch     = var.git_branch
-      chart_path = var.chart_path
-      app_ns     = "default"
+      repo_url           = var.git_repo_url
+      branch             = var.git_branch
+      chart_path         = var.chart_path
+      app_ns             = "default"
+      ecr_repository_url = var.ecr_repository_url
     })
   ]
 

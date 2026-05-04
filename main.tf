@@ -68,11 +68,12 @@ module "jenkins" {
 module "argo_cd" {
   source = "./modules/argo_cd"
 
-  git_repo_url = var.git_repo_url
-  git_branch   = var.git_branch
-  chart_path   = "charts/django-app"
+  git_repo_url       = var.git_repo_url
+  git_branch         = var.git_branch
+  chart_path         = "charts/django-app"
+  ecr_repository_url = module.ecr.repository_url
 
-  depends_on = [module.eks]
+  depends_on = [module.eks, module.ecr]
 }
 
 module "monitoring" {

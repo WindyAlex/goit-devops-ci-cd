@@ -12,6 +12,9 @@ spec:
     helm:
       valueFiles:
         - values.yaml
+      parameters:
+        - name: image.repository
+          value: {{ .Values.imageRepository | quote }}
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.namespace | quote }}

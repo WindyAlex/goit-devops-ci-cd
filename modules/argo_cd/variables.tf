@@ -18,3 +18,8 @@ variable "chart_path" {
   type        = string
   description = "Path to Helm chart in repository."
 }
+
+variable "ecr_repository_url" {
+  type        = string
+  description = "ECR repository URL for Django app image."
+}
