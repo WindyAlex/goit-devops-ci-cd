@@ -39,24 +39,6 @@ spec:
     }
   }
 
-  parameters {
-    string(
-      name: 'ECR_REPOSITORY_URL',
-      defaultValue: '',
-      description: 'ECR repository URL from Terraform output'
-    )
-    string(
-      name: 'GIT_REPO_URL',
-      defaultValue: 'https://github.com/WindyAlex/goit-devops-ci-cd',
-      description: 'Git repository URL'
-    )
-    string(
-      name: 'GIT_BRANCH',
-      defaultValue: 'final-project',
-      description: 'Git branch for Helm chart update'
-    )
-  }
-
   environment {
     IMAGE_TAG = "${env.BUILD_NUMBER}"
     COMMIT_EMAIL = "jenkins@example.com"
