@@ -71,7 +71,7 @@ variable "skip_final_snapshot" {
 variable "backup_retention_period" {
   type        = number
   description = "Backup retention period in days."
-  default     = 7
+  default     = 1
 }
 
 variable "allowed_cidr_blocks" {
