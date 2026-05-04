@@ -39,6 +39,24 @@ spec:
     }
   }
 
+  parameters {
+    string(
+      name: 'ECR_REPOSITORY_URL',
+      defaultValue: '',
+      description: 'ECR repository URL from Terraform output'
+    )
+    string(
+      name: 'GIT_REPO_URL',
+      defaultValue: 'https://github.com/WindyAlex/goit-devops-ci-cd',
+      description: 'Git repository URL'
+    )
+    string(
+      name: 'GIT_BRANCH',
+      defaultValue: 'final-project',
+      description: 'Git branch for Helm chart update'
+    )
+  }
+
   environment {
     IMAGE_TAG = "${env.BUILD_NUMBER}"
     COMMIT_EMAIL = "jenkins@example.com"
@@ -46,6 +64,17 @@ spec:
   }
 
   stages {
+    stage('Validate Parameters') {
+      steps {
+        sh '''
+          set -e
+          test -n "$ECR_REPOSITORY_URL" || (echo "ECR_REPOSITORY_URL is empty" && exit 1)
+          test -n "$GIT_REPO_URL" || (echo "GIT_REPO_URL is empty" && exit 1)
+          test -n "$GIT_BRANCH" || (echo "GIT_BRANCH is empty" && exit 1)
+        '''
+      }
+    }
+
     stage('Checkout') {
       steps {
         checkout scm
@@ -56,6 +85,7 @@ spec:
       steps {
         container('kaniko') {
           sh '''
+            set -e
             /kaniko/executor \
               --context "$WORKSPACE/Django" \
               --dockerfile "$WORKSPACE/Django/Dockerfile" \
@@ -73,16 +103,19 @@ spec:
             sh '''
               set -e
               rm -rf repo
+
               AUTH_REPO_URL=$(echo "$GIT_REPO_URL" | sed "s#https://#https://$GIT_USER:$GIT_TOKEN@#")
+
               git clone "$AUTH_REPO_URL" repo
               cd repo
               git checkout "$GIT_BRANCH"
 
-              sed -i "s|repository: .*|repository: \"$ECR_REPOSITORY_URL\"|" charts/django-app/values.yaml
-              sed -i "s|tag: .*|tag: \"$IMAGE_TAG\"|" charts/django-app/values.yaml
+              sed -i "s|repository: .*|repository: \\"$ECR_REPOSITORY_URL\\"|" charts/django-app/values.yaml
+              sed -i "s|tag: .*|tag: \\"$IMAGE_TAG\\"|" charts/django-app/values.yaml
 
               git config user.email "$COMMIT_EMAIL"
               git config user.name "$COMMIT_NAME"
+
               git add charts/django-app/values.yaml
               git commit -m "[skip ci] Update image to $ECR_REPOSITORY_URL:$IMAGE_TAG" || echo "No changes to commit"
               git push origin "$GIT_BRANCH"
