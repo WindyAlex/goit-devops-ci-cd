@@ -86,11 +86,13 @@ spec:
               set -e
               rm -rf repo
 
+              BRANCH_NAME="${GIT_BRANCH#origin/}"
               AUTH_REPO_URL=$(echo "$GIT_REPO_URL" | sed "s#https://#https://$GIT_USER:$GIT_TOKEN@#")
 
               git clone "$AUTH_REPO_URL" repo
               cd repo
-              git checkout "$GIT_BRANCH"
+              git fetch origin "$BRANCH_NAME"
+              git checkout -B "$BRANCH_NAME" "origin/$BRANCH_NAME"
 
               sed -i "s|repository: .*|repository: \\"$ECR_REPOSITORY_URL\\"|" charts/django-app/values.yaml
               sed -i "s|tag: .*|tag: \\"$IMAGE_TAG\\"|" charts/django-app/values.yaml
@@ -100,7 +102,7 @@ spec:
 
               git add charts/django-app/values.yaml
               git commit -m "[skip ci] Update image to $ECR_REPOSITORY_URL:$IMAGE_TAG" || echo "No changes to commit"
-              git push origin "$GIT_BRANCH"
+              git push origin "$BRANCH_NAME"
             '''
           }
         }
