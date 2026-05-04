@@ -49,3 +49,9 @@ variable "aws_region" {
   type        = string
   description = "AWS region."
 }
+
+variable "jenkins_admin_password" {
+  type        = string
+  sensitive   = true
+  description = "Jenkins admin password."
+}

@@ -67,3 +67,15 @@ variable "skip_final_snapshot" {
   description = "Skip final snapshot on destroy for lab cleanup."
   default     = true
 }
+
+variable "backup_retention_period" {
+  type        = number
+  description = "Backup retention period in days."
+  default     = 7
+}
+
+variable "allowed_cidr_blocks" {
+  type        = list(string)
+  description = "CIDR blocks allowed to connect to the database."
+  default     = ["10.0.0.0/16"]
+}

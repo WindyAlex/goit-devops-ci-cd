@@ -26,7 +26,7 @@ resource "aws_security_group" "this" {
     from_port   = var.db_port
     to_port     = var.db_port
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
+    cidr_blocks = var.allowed_cidr_blocks
   }
 
   egress {
@@ -102,5 +102,37 @@ resource "aws_rds_cluster_parameter_group" "this" {
 
   tags = {
     Name = "${var.project_name}-aurora-parameter-group"
+  }
+}
+
+resource "aws_db_parameter_group" "aurora_instance" {
+  count = var.use_aurora ? 1 : 0
+
+  name   = "${var.project_name}-aurora-instance-parameter-group"
+  family = local.family
+
+  parameter {
+    name         = "log_statement"
+    value        = "none"
+    apply_method = "pending-reboot"
+  }
+
+  parameter {
+    name         = "max_connections"
+    value        = "100"
+    apply_method = "pending-reboot"
+  }
+
+  dynamic "parameter" {
+    for_each = local.is_postgres ? [1] : []
+    content {
+      name         = "work_mem"
+      value        = "4096"
+      apply_method = "pending-reboot"
+    }
+  }
+
+  tags = {
+    Name = "${var.project_name}-aurora-instance-parameter-group"
   }
 }

@@ -60,3 +60,15 @@ variable "use_aurora" {
   description = "true creates Aurora cluster, false creates a standard RDS instance."
   default     = false
 }
+
+variable "jenkins_admin_password" {
+  type        = string
+  sensitive   = true
+  description = "Jenkins admin password."
+}
+
+variable "grafana_admin_password" {
+  type      = string
+  sensitive = true
+  description = "Grafana admin password."
+}

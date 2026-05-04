@@ -42,21 +42,25 @@ module "rds" {
   password = var.db_password
   multi_az = false
 
+  allowed_cidr_blocks     = [module.vpc.vpc_cidr_block]
+  backup_retention_period = 7
+
   depends_on = [module.vpc]
 }
 
 module "jenkins" {
   source = "./modules/jenkins"
 
-  cluster_name       = module.eks.cluster_name
-  oidc_provider_arn  = aws_iam_openid_connect_provider.oidc.arn
-  oidc_provider_url  = aws_iam_openid_connect_provider.oidc.url
-  github_username    = var.github_username
-  github_token       = var.github_token
-  git_repo_url       = var.git_repo_url
-  git_branch         = var.git_branch
-  ecr_repository_url = module.ecr.repository_url
-  aws_region         = var.aws_region
+  cluster_name            = module.eks.cluster_name
+  oidc_provider_arn       = aws_iam_openid_connect_provider.oidc.arn
+  oidc_provider_url       = aws_iam_openid_connect_provider.oidc.url
+  github_username         = var.github_username
+  github_token            = var.github_token
+  git_repo_url            = var.git_repo_url
+  git_branch              = var.git_branch
+  ecr_repository_url      = module.ecr.repository_url
+  aws_region              = var.aws_region
+  jenkins_admin_password  = var.jenkins_admin_password
 
   depends_on = [module.eks, aws_iam_openid_connect_provider.oidc]
 }
@@ -74,5 +78,6 @@ module "argo_cd" {
 module "monitoring" {
   source = "./modules/monitoring"
 
-  depends_on = [module.eks]
+  grafana_admin_password  = var.grafana_admin_password
+  depends_on              = [module.eks]
 }
